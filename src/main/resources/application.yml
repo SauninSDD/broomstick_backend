@@ -1,0 +1,13 @@
+server:
+  port: 8085
+  error:
+    include-message: always
+  servlet:
+    context-path: /Broomstick
+
+spring:
+  application.name: ${VAULT_APPLICATION_NAME}
+  profiles.include:
+    db,
+    oauth
+

@@ -1,0 +1,13 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${VAULT_OAUTH2_ISSUER_URI}
+          jwk-set-uri: ${VAULT_OAUTH2_ISSUER_URI}/protocol/openid-connect/certs
+
+jwt:
+  auth:
+    converter:
+      resource-id: login-app
+      principle-attribute: preferred_username

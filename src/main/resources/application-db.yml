@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: ${VAULT_DB_URL}
+    username: ${VAULT_DB_USERNAME}
+    password: ${VAULT_DB_PASSWORD}
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: market_db
+    hibernate:
+      ddl-auto: update

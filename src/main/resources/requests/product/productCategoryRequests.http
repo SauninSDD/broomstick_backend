@@ -1,0 +1,8 @@
+###Получает список категорий
+GET localhost:8085/Broomstick/categories/getCategories?language=en
+
+###Получает список подкатгорий по categoryId (без вложенных)
+GET localhost:8085/Broomstick/categories/getSubCategories?categoryId=1
+
+###Получает вложенный список подкатгорий по categoryId
+GET localhost:8085/Broomstick/categories/getNestedSubCategories?categoryId=1
