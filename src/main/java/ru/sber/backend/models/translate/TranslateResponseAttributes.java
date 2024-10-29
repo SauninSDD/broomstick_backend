@@ -1,4 +1,4 @@
-package ru.sber.backend.models.product;
+package ru.sber.backend.models.translate;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

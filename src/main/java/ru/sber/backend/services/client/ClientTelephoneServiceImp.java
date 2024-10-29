@@ -50,8 +50,11 @@ public class ClientTelephoneServiceImp implements ClientTelephoneService {
     @Override
     public List<String> getAllClientPhonesByClientId() {
         loggingRepository.save(new Logfile("Попытка получения телефонов пользователя", clientService.getIdClient()));
+
         List<ClientPhone> clientPhones = clientPhoneRepository.findAllClientPhonesByIdClient(clientService.getIdClient());
+
         loggingRepository.save(new Logfile("Получение телефонов пользователя", clientPhones.stream().map(ClientPhone::getPhone).toList(), clientService.getIdClient()));
+
         return clientPhones.stream().map(ClientPhone::getPhone).toList();
     }
 

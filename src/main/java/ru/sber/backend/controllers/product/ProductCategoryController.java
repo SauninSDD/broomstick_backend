@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.sber.backend.clients.translates.TranslationService;
 import ru.sber.backend.entities.product.ProductCategory;
+import ru.sber.backend.models.ApiResponse;
+import ru.sber.backend.models.category.GetCategoryResponse;
 import ru.sber.backend.services.product.ProductCategoryService;
 
 import java.util.List;
@@ -30,7 +32,7 @@ public class ProductCategoryController {
      * @return List<String>
      */
     @GetMapping("/getCategories")
-    public ResponseEntity<List<ProductCategory>> getCategories(@RequestParam @NotBlank String language) {
+    public ResponseEntity<ApiResponse<GetCategoryResponse>> getCategories(@RequestParam @NotBlank String language) {
         log.info("Получение категорий");
         List<ProductCategory> categories = productCategoryService.getCategories();
         if (language.equals("en") && !categories.isEmpty()) {
@@ -38,8 +40,9 @@ public class ProductCategoryController {
             log.info("Переводы категорий: {}", categories);
         }
         log.info("список категорий: {}", categories);
-        return ResponseEntity.ok()
-                .body(categories);
+
+        ApiResponse<GetCategoryResponse> response = new ApiResponse<>(true, new GetCategoryResponse(categories));
+        return ResponseEntity.ok(response);
     }
 
     /**

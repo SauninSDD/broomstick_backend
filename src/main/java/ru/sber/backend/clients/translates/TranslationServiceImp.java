@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import ru.sber.backend.entities.product.ProductCategory;
-import ru.sber.backend.models.product.GetProductResponse;
-import ru.sber.backend.models.product.TranslateRequest;
-import ru.sber.backend.models.product.TranslateResponse;
-import ru.sber.backend.models.product.TranslateResponseAttributes;
+import ru.sber.backend.models.product.ProductDTO;
+import ru.sber.backend.models.translate.TranslateRequest;
+import ru.sber.backend.models.translate.TranslateResponse;
+import ru.sber.backend.models.translate.TranslateResponseAttributes;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -50,9 +50,9 @@ public class TranslationServiceImp implements TranslationService {
 
     @Override
     @Cacheable("translationProductsCache")
-    public List<GetProductResponse> translateProducts(List<GetProductResponse> productsForTranslate) {
-        List<String> listOfNames = productsForTranslate.stream().map(GetProductResponse::getProductName).toList();
-        List<String> listOfDescriptions = productsForTranslate.stream().map(GetProductResponse::getProductDescription).toList();
+    public List<ProductDTO> translateProducts(List<ProductDTO> productsForTranslate) {
+        List<String> listOfNames = productsForTranslate.stream().map(ProductDTO::getProductName).toList();
+        List<String> listOfDescriptions = productsForTranslate.stream().map(ProductDTO::getProductDescription).toList();
         List<String> listForTranslate = Stream.concat(listOfNames.stream(), listOfDescriptions.stream())
                 .toList();
 

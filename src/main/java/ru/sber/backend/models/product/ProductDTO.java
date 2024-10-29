@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetProductResponse {
+public class ProductDTO {
     private Long id;
 
     private String productName;
@@ -29,7 +29,7 @@ public class GetProductResponse {
 
     private int productArticle;
 
-    public GetProductResponse(Product product) {
+    public ProductDTO(Product product) {
         this.id = product.getId();
         this.productName = product.getProductName();
         this.productPrice = product.getProductPrice();

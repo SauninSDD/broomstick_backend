@@ -6,8 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
+
 
 @Data
 @Table(name = "clients_carts")
@@ -15,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cart {
-
     @Id
     @Column(name = "id_cart")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +31,5 @@ public class Cart {
     private String idClient;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
-    private Set<CartProduct> productsInCart = new HashSet<>();
-
-
+    private List<CartProduct> productsInCart = new ArrayList<>();
 }

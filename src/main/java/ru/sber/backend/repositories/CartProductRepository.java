@@ -20,12 +20,12 @@ public interface CartProductRepository extends JpaRepository<CartProduct, Long> 
     List<CartProduct> findByCartId(long cartId);
 
     /**
-     * Удаляет блюдо из корзины
+     * Удаляет товар из корзины
      *
      * @param cartId id корзины
-     * @param dishId id блюда
+     * @param productId id товара
      */
-//    void deleteCartItemByCartIdAndDishId(long cartId, long dishId);
+    void deleteCartProductByCartIdAndProductId(long cartId, Long productId);
 //
 //    void deleteAllByCart_Id(long cartId);
 }

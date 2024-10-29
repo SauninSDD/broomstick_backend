@@ -11,10 +11,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import ru.sber.backend.exceptions.TranslateError;
-import ru.sber.backend.models.product.TranslateRequest;
-import ru.sber.backend.models.product.TranslateResponse;
-import ru.sber.backend.models.product.TranslateTokenRequest;
-import ru.sber.backend.models.product.TranslateTokenResponse;
+import ru.sber.backend.models.translate.TranslateRequest;
+import ru.sber.backend.models.translate.TranslateResponse;
+import ru.sber.backend.models.translate.TranslateTokenRequest;
+import ru.sber.backend.models.translate.TranslateTokenResponse;
 
 import java.util.Objects;
 

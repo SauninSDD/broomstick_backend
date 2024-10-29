@@ -19,8 +19,9 @@ public class GetCartProductsResponse {
 
     private List<CartProductDTO> cartProductsList;
 
-    public GetCartProductsResponse(Cart cart) {
+    public GetCartProductsResponse(Cart cart, List<CartProductDTO> cartProductsList) {
         this.totalPrice = cart.getClientCartTotalPrice();
         this.productValue = cart.getClientCartProductValue();
+        this.cartProductsList = cartProductsList;
     }
 }

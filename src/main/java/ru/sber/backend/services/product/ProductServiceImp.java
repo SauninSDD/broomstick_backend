@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.sber.backend.entities.product.Product;
 import ru.sber.backend.exceptions.ProductNotFound;
-import ru.sber.backend.models.product.GetProductResponse;
+import ru.sber.backend.models.product.ProductDTO;
 import ru.sber.backend.repositories.product.ProductCategoryRepository;
 import ru.sber.backend.repositories.product.ProductRepository;
 
@@ -34,18 +34,18 @@ public class ProductServiceImp implements ProductService {
     }
 
     @Override
-    public GetProductResponse getProductByArticle(int productArticle) {
+    public ProductDTO getProductByArticle(int productArticle) {
         Product product = productRepository.findByProductArticle(productArticle);
         if (product == null) {
             throw new ProductNotFound("Продукт не найден");
         } else {
-            return new GetProductResponse(product);
+            return new ProductDTO(product);
         }
     }
 
 
     @Override
-    public Page<GetProductResponse> getProductsByCategoryId(int page, int size, Long categoryId) {
+    public Page<ProductDTO> getProductsByCategoryId(int page, int size, Long categoryId) {
         boolean isExistCategory = productCategoryRepository.existsById(categoryId);
         Page<Product> productsPage;
         if (isExistCategory) {
@@ -58,19 +58,19 @@ public class ProductServiceImp implements ProductService {
 
 
     @Override
-    public Page<GetProductResponse> getProductsByName(int page, int size, String productName) {
+    public Page<ProductDTO> getProductsByName(int page, int size, String productName) {
         Page<Product> productsByName = productRepository.findByProductName(productName, PageRequest.of(page, size));
         return productsByName.map(getGetProductResponseFunction());
     }
 
     @Override
-    public Page<GetProductResponse> getProductsByPriceRangeAndCategory(int page, int size, BigDecimal minPrice, BigDecimal maxPrice, String category) {
+    public Page<ProductDTO> getProductsByPriceRangeAndCategory(int page, int size, BigDecimal minPrice, BigDecimal maxPrice, String category) {
         Page<Product> productsByPriceRangeAndCategory = productRepository.findByPriceRangeAndCategoryName(minPrice, maxPrice, category, PageRequest.of(page, size));
         return productsByPriceRangeAndCategory.map(getGetProductResponseFunction());
     }
 
     @Override
-    public Page<GetProductResponse> getProductsByPriceRange(int page, int size, BigDecimal minPrice, BigDecimal maxPrice) {
+    public Page<ProductDTO> getProductsByPriceRange(int page, int size, BigDecimal minPrice, BigDecimal maxPrice) {
         Page<Product> productsByPriceRange = productRepository.findByPriceRange(minPrice, maxPrice, PageRequest.of(page, size));
         return productsByPriceRange.map(getGetProductResponseFunction());
     }
@@ -101,12 +101,12 @@ public class ProductServiceImp implements ProductService {
     }
 
     /**
-     * Преобразует класс Product {@link Product} в {@link GetProductResponse}
+     * Преобразует класс Product {@link Product} в {@link ProductDTO}
      *
      * @return GetProductResponse
      */
-    private Function<Product, GetProductResponse> getGetProductResponseFunction() {
-        return GetProductResponse::new;
+    private Function<Product, ProductDTO> getGetProductResponseFunction() {
+        return ProductDTO::new;
     }
 
 

@@ -17,12 +17,15 @@ import ru.sber.backend.entities.Logfile;
 import ru.sber.backend.entities.request.LoginRequest;
 import ru.sber.backend.entities.request.SignupRequest;
 //import ru.sber.backend.services.EmailService;
+import ru.sber.backend.models.ApiResponse;
+import ru.sber.backend.models.RequestError;
 import ru.sber.backend.models.keycloack.*;
 import ru.sber.backend.repositories.LoggingRepository;
 import ru.sber.backend.services.JwtService;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -51,7 +54,7 @@ public class AuthorizationController {
 
     @PreAuthorize("hasRole('client_user')")
     @PutMapping
-    public ResponseEntity<?> updateUserInfo(@RequestBody SignupRequest signupRequest) throws JsonProcessingException {
+    public ResponseEntity<ApiResponse<String>> updateUserInfo(@RequestBody SignupRequest signupRequest) throws JsonProcessingException {
         log.info("Выводим новые данные о клиенте {}", signupRequest);
         loggingRepository.save(new Logfile("Попытка обновления данных пользователя", signupRequest));
 
@@ -95,16 +98,17 @@ public class AuthorizationController {
             log.info("Результат отправки на keycloak: {}", userResponseEntity.getStatusCode());
             loggingRepository.save(new Logfile("Результат отправки на keycloak", userResponseEntity));
 
+            log.info("body update: {}", userResponseEntity.getBody());
 
-            return new ResponseEntity<>(userResponseEntity.getStatusCode());
+            return new ResponseEntity<>(new ApiResponse<>(true), HttpStatus.OK);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка обновления данных пользователя", e.getMessage())), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/signin")
-    public ResponseEntity<String> signInUser(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<JsonNode>> signInUser(@RequestBody LoginRequest loginRequest) {
         loggingRepository.save(new Logfile("Попытка авторизации пользователя", loginRequest));
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -122,17 +126,22 @@ public class AuthorizationController {
                     keycloakTokenUrl, HttpMethod.POST, tokenEntity, String.class);
             loggingRepository.save(new Logfile("Код ответа авторизации", tokenResponseEntity.getStatusCode()));
 
-            return new ResponseEntity<>(tokenResponseEntity.getBody(),
+            log.info("body{}", tokenResponseEntity.getBody());
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(tokenResponseEntity.getBody());
+
+            return new ResponseEntity<>(new ApiResponse<>(true, jsonNode),
                     tokenResponseEntity.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка авторизации пользователя", e.getMessage())), HttpStatus.BAD_REQUEST);
         }
     }
 
 
     @PostMapping("/signup")
-    public ResponseEntity<String> signUpUser(@RequestBody SignupRequest signupRequest) throws JsonProcessingException {
+    public ResponseEntity<ApiResponse<Void>> signUpUser(@RequestBody SignupRequest signupRequest) throws JsonProcessingException {
         log.info("Выводим данные о клиенте {}", signupRequest);
         loggingRepository.save(new Logfile("Попытка регистрации пользователя", signupRequest));
 
@@ -169,17 +178,18 @@ public class AuthorizationController {
             loggingRepository.save(new Logfile("Результат отправки на keycloak ", userResponseEntity.getStatusCode()));
 
 
-            return new ResponseEntity<>(userResponseEntity.getStatusCode());
+            return new ResponseEntity<>(new ApiResponse<>(true), userResponseEntity.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка регистрации пользователя", e.getMessage())), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<String> refreshUser(@RequestBody RefreshToken refreshToken) {
+    public ResponseEntity<ApiResponse<JsonNode>> refreshUser(@RequestBody RefreshToken refreshToken) {
         HttpHeaders tokenHeaders = new HttpHeaders();
         tokenHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        log.info("refreshToken: {}", refreshToken);
 
         MultiValueMap<String, String> tokenBody = new LinkedMultiValueMap<>();
         tokenBody.add("grant_type", "refresh_token");
@@ -192,30 +202,32 @@ public class AuthorizationController {
             ResponseEntity<String> tokenResponseEntity = new RestTemplate().exchange(
                     keycloakTokenUrl, HttpMethod.POST, tokenEntity, String.class);
             log.info("result refresh: {}", tokenResponseEntity.getStatusCode());
-            return new ResponseEntity<>(tokenResponseEntity.getBody(),
+            ObjectMapper objectMapper = new ObjectMapper();
+            JsonNode jsonNode = objectMapper.readTree(tokenResponseEntity.getBody());
+            return new ResponseEntity<>(new ApiResponse<>(true, jsonNode),
                     tokenResponseEntity.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка обновления токена доступа", e.getMessage())), HttpStatus.BAD_REQUEST);
         }
     }
 
     @PreAuthorize("hasRole('client_user')")
     @GetMapping
-    public ResponseEntity<UserResponse> getUserDetails() {
+    public ResponseEntity<ApiResponse<UserResponse>> getUserDetails() {
 
         HttpHeaders userHeaders = new HttpHeaders();
         userHeaders.setContentType(MediaType.APPLICATION_JSON);
 
         Jwt jwt = jwtService.getJwtSecurityContext();
-        UserResponse userDetails = new UserResponse(
+        UserDTO userDetails = new UserDTO(
                 jwtService.getSubClaim(jwt), jwtService.getPreferredUsernameClaim(jwt),
                 jwtService.getEmailClaim(jwt), jwtService.getPhoneNumberClaim(jwt),
                 jwtService.getBirthdate(jwt), jwtService.getGender(jwt)
         );
 
         loggingRepository.save(new Logfile("Попытка получения данных пользователя", userDetails.getId()));
-        return new ResponseEntity<>(userDetails, userHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse<>(true, new UserResponse(userDetails)), userHeaders, HttpStatus.OK);
     }
 
 /*    @PutMapping("/reset-password")
@@ -261,11 +273,10 @@ public class AuthorizationController {
         }
     }*/
 
-    private HttpHeaders getHttpHeadersAdmin() throws JsonProcessingException {
+    private HttpHeaders getHttpHeadersAdmin() {
         HttpHeaders userHeaders = new HttpHeaders();
         userHeaders.setContentType(MediaType.APPLICATION_JSON);
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(signInUser(new LoginRequest("admin", "11111")).getBody());
+        JsonNode rootNode = Objects.requireNonNull(signInUser(new LoginRequest("admin", "11111")).getBody()).getBody();
         String accessToken = rootNode.path("access_token").asText();
         userHeaders.setBearerAuth(accessToken);
         return userHeaders;
