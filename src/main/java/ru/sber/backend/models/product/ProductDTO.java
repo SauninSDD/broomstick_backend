@@ -13,31 +13,36 @@ import java.math.BigDecimal;
 public class ProductDTO {
     private Long id;
 
-    private String productName;
+    private String name;
 
-    private BigDecimal productPrice;
+    private BigDecimal price;
 
-    private String productDescription;
+    private String description;
 
-    private int productWeight;
+    private int weight;
 
-    private int productWidth;
+    private int width;
 
-    private int productHeight;
+    private int height;
 
-    private int productLength;
+    private int length;
 
-    private int productArticle;
+    private int article;
+
+    private String imageUrl;
+
+    private String category;
 
     public ProductDTO(Product product) {
         this.id = product.getId();
-        this.productName = product.getProductName();
-        this.productPrice = product.getProductPrice();
-        this.productDescription = product.getProductDescription();
-        this.productWeight = product.getProductWeight();
-        this.productWidth = product.getProductWidth();
-        this.productHeight = product.getProductHeight();
-        this.productLength = product.getProductLength();
-        this.productArticle = product.getProductArticle();
+        this.name = product.getProductName();
+        this.price = product.getProductPrice();
+        this.description = product.getProductDescription();
+        this.width = product.getProductWidth();
+        this.height = product.getProductHeight();
+        this.length = product.getProductLength();
+        this.article = product.getProductArticle();
+        this.imageUrl = product.getImageUrl();
+        this.category = product.getCategory().getName();
     }
 }

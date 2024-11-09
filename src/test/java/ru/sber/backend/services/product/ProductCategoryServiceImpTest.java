@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.sber.backend.entities.product.ProductCategory;
-import ru.sber.backend.models.product.AddProductCategoryRequest;
+import ru.sber.backend.models.product.category.AddProductCategoryRequest;
 import ru.sber.backend.repositories.product.ProductCategoryRepository;
 
 import java.util.Arrays;

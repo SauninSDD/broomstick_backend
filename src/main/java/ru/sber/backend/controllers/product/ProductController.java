@@ -52,7 +52,7 @@ public class ProductController {
      * @return список продуктов
      */
     @GetMapping("/searchByCategory")
-    public ResponseEntity<ApiResponse<GetCatalogResponse>> getListProduct(@RequestParam int page, @RequestParam int size, @RequestParam Long categoryId, @RequestParam String language) {
+    public ResponseEntity<ApiResponse<GetCatalogResponse>> getListProductByCategory(@RequestParam int page, @RequestParam int size, @RequestParam Long categoryId, @RequestParam String language) {
         log.info("rest searchByCategory {}", categoryId);
         Page<ProductDTO> pageProduct = productService.getProductsByCategoryId(page, size, categoryId);
         List<ProductDTO> listProducts = pageProduct.getContent();
@@ -61,27 +61,33 @@ public class ProductController {
             log.info("Переводы: {}", listProducts);
         }
         GetCatalogResponse response = new GetCatalogResponse(listProducts, pageProduct.getTotalPages());
+
         return ResponseEntity.ok()
                 .body(new ApiResponse<>(true, response));
     }
 
-    // TODO нужно переписать метод
     /**
      * Получает список продуктов по названию
      *
      * @return список продуктов с подходящим названием
      */
     @GetMapping("/searchByName")
-    public ResponseEntity<List<ProductDTO>> getProductByName(@RequestParam int page, @RequestParam int size, @RequestParam String name) {
+    public ResponseEntity<ApiResponse<GetCatalogResponse>> searchProducts(@RequestParam int page, @RequestParam int size, @RequestParam Long categoryId, @RequestParam String language, @RequestParam String name) {
         log.info("Получение продуктов по названию");
-        Page<ProductDTO> productsByName = productService.getProductsByName(page, size, name);
-        log.info("продукты по названию: {}", productsByName);
-        log.info("Суммарное кол-во страниц: {}", productsByName.getTotalPages());
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("x-total-pages", String.valueOf(productsByName.getTotalPages()));
+        Page<ProductDTO> pageProductsByName = productService.getProductsByName(page, size, name, categoryId);
+        log.info("продукты по названию: {}", pageProductsByName);
+        List<ProductDTO> listProducts = pageProductsByName.getContent();
+
+        if (language.equals("en") && !listProducts.isEmpty()) {
+            listProducts = translationService.translateProducts(listProducts);
+            log.info("Переводы: {}", listProducts);
+        }
+
+        log.info("Суммарное кол-во страниц: {}", pageProductsByName.getTotalPages());
+        GetCatalogResponse response = new GetCatalogResponse(listProducts, pageProductsByName.getTotalPages());
+
         return ResponseEntity.ok()
-                .headers(headers)
-                .body(productsByName.getContent());
+                .body(new ApiResponse<>(true, response));
     }
 
     /**

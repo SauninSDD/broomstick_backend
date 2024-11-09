@@ -135,7 +135,7 @@ public class AuthorizationController {
                     tokenResponseEntity.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка авторизации пользователя", e.getMessage())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка авторизации пользователя", e.getMessage())), HttpStatus.OK);
         }
     }
 
@@ -181,7 +181,7 @@ public class AuthorizationController {
             return new ResponseEntity<>(new ApiResponse<>(true), userResponseEntity.getStatusCode());
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка регистрации пользователя", e.getMessage())), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new ApiResponse<>(false, new RequestError("Ошибка регистрации пользователя", e.getMessage())), HttpStatus.OK);
         }
     }
 

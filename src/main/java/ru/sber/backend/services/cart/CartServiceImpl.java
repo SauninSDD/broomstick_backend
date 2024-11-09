@@ -7,13 +7,14 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.sber.backend.entities.cart.Cart;
 import ru.sber.backend.entities.cart.CartProduct;
 import ru.sber.backend.entities.product.Product;
-import ru.sber.backend.models.cart.CartProductDTO;
+import ru.sber.backend.models.cart.CartProductDTOResponse;
 import ru.sber.backend.models.cart.GetCartProductsResponse;
 import ru.sber.backend.repositories.CartProductRepository;
 import ru.sber.backend.repositories.CartRepository;
 import ru.sber.backend.repositories.product.ProductRepository;
 import ru.sber.backend.services.client.ClientService;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 @Slf4j
@@ -33,20 +34,30 @@ public class CartServiceImpl implements CartService {
         this.productRepository = productRepository;
     }
 
-
     @Override
     public GetCartProductsResponse getCartProducts() {
-        Optional<Cart> cart = cartRepository.findCartByIdClient(clientService.getIdClient());
+        return cartRepository.findCartByIdClient(clientService.getIdClient())
+                .map(cart -> {
+                    List<CartProductDTOResponse> cartProducts = cartProductRepository.findByCartId(cart.getId())
+                            .stream()
+                            .map(CartProductDTOResponse::new)
+                            .sorted(Comparator.comparing(CartProductDTOResponse::getId))
+                            .toList();
+                    log.info("Получаем список блюд в корзине {}", cartProducts);
 
-        if (cart.isPresent()) {
-            List<CartProductDTO> cartProducts = cartProductRepository.findByCartId(cart.get().getId()).stream().map(CartProductDTO::new).toList();
-            log.info("Получаем список блюд в корзине {}", cartProducts);
+                    BigDecimal totalPrice = cartProducts.stream()
+                            .map(CartProductDTOResponse::getCartProductPrice)
+                            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            return new GetCartProductsResponse(cart.get(), cartProducts);
-        }
+                    int productValue = cartProducts.stream()
+                            .map(CartProductDTOResponse::getCartProductQuantity)
+                            .reduce(0, Integer::sum);
 
-        return null;
+                    return new GetCartProductsResponse(totalPrice, productValue, cartProducts);
+                })
+                .orElse(null);
     }
+
 
     @Transactional
     @Override
@@ -56,8 +67,12 @@ public class CartServiceImpl implements CartService {
         if (product.isPresent()) {
         String clientId = clientService.getIdClient();
         Cart cart = cartRepository.findCartByIdClient(clientId).orElseGet(() -> {
-            Cart newCart = new Cart();
-            newCart.setIdClient(clientId);
+            Cart newCart = Cart.builder()
+                    .idClient(clientId)
+//                    .clientCartTotalPrice(product.get().getProductPrice())
+//                    .clientCartProductValue(1)
+                    .productsInCart(new ArrayList<>())
+                    .build();
             log.info("Создание корзины пользователя");
             return cartRepository.save(newCart);
         });
@@ -71,6 +86,7 @@ public class CartServiceImpl implements CartService {
         if (cartProduct.isPresent()) {
             CartProduct existingCartProduct = cartProduct.get();
             existingCartProduct.setCartProductQuantity(existingCartProduct.getCartProductQuantity() + 1);
+            existingCartProduct.setCartProductPrice(existingCartProduct.getCartProductPrice().add(product.get().getProductPrice()));
         } else {
             CartProduct newCartProduct = CartProduct.builder()
                     .cart(cart)
@@ -81,6 +97,8 @@ public class CartServiceImpl implements CartService {
             cart.getProductsInCart().add(newCartProduct);
         }
 
+//        cart.setClientCartTotalPrice(cart.getClientCartTotalPrice().add(product.get().getProductPrice()));
+//        cart.setClientCartProductValue(cart.getClientCartProductValue() + 1);
         cartRepository.save(cart);
 
         return true;
@@ -93,20 +111,29 @@ public class CartServiceImpl implements CartService {
     @Override
     public boolean deleteFromCart(Long productId) {
         Optional<Cart> cart = cartRepository.findCartByIdClient(clientService.getIdClient());
-        if (cart.isPresent()) {
-            cartProductRepository.deleteCartProductByCartIdAndProductId(cart.get().getId(), productId);
+        Optional<Product> product = productRepository.findById(productId);
+
+        if (cart.isPresent() && product.isPresent()) {
+            Cart existingCart = cart.get();
+//            Product existingProduct = product.get();
+//            existingCart.setClientCartTotalPrice(existingCart.getClientCartTotalPrice().subtract(existingProduct.getProductPrice()));
+//            existingCart.setClientCartProductValue(existingCart.getClientCartProductValue() - 1);
+            cartProductRepository.deleteCartProductByCartIdAndProductId(existingCart.getId(), productId);
+
             return true;
         }
+
         return false;
     }
 
     @Transactional
     @Override
     public boolean updateProductQuantity(Long productId, int quantity) {
+        Optional<Product> optionalProduct = productRepository.findById(productId);
         Optional<Cart> optionalCart = cartRepository.findCartByIdClient(clientService.getIdClient());
-        Optional<Product> product = productRepository.findById(productId);
 
-        if (optionalCart.isPresent() && product.isPresent()) {
+        if (optionalCart.isPresent() && optionalProduct.isPresent()) {
+            Product product = optionalProduct.get();
             Cart cart = optionalCart.get();
             List<CartProduct> cartProducts = cart.getProductsInCart();
 
@@ -115,11 +142,15 @@ public class CartServiceImpl implements CartService {
                     .findFirst();
 
             cartProductToUpdate.ifPresent(item -> {
+                // TODO проверка на кол-во в бд
                 item.setCartProductQuantity(quantity);
-                cartRepository.save(cart);
+                item.setCartProductPrice(product.getProductPrice().multiply(BigDecimal.valueOf(quantity)));
+//                cart.setClientCartTotalPrice(cart.getClientCartTotalPrice().add(product.getProductPrice().multiply(BigDecimal.valueOf(quantity))));
+//                cart.setClientCartProductValue(cart.getClientCartProductValue() + quantity);
+                cartProductRepository.save(item);
             });
 
-            return cartProductToUpdate.isPresent();
+            return true;
         }
 
         return false;

@@ -2,7 +2,7 @@ package ru.sber.backend.services.product;
 
 
 import ru.sber.backend.entities.product.ProductCategory;
-import ru.sber.backend.models.product.AddProductCategoryRequest;
+import ru.sber.backend.models.product.category.AddProductCategoryRequest;
 
 import java.util.List;
 

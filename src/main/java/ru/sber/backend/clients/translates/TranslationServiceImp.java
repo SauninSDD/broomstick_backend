@@ -51,8 +51,8 @@ public class TranslationServiceImp implements TranslationService {
     @Override
     @Cacheable("translationProductsCache")
     public List<ProductDTO> translateProducts(List<ProductDTO> productsForTranslate) {
-        List<String> listOfNames = productsForTranslate.stream().map(ProductDTO::getProductName).toList();
-        List<String> listOfDescriptions = productsForTranslate.stream().map(ProductDTO::getProductDescription).toList();
+        List<String> listOfNames = productsForTranslate.stream().map(ProductDTO::getName).toList();
+        List<String> listOfDescriptions = productsForTranslate.stream().map(ProductDTO::getDescription).toList();
         List<String> listForTranslate = Stream.concat(listOfNames.stream(), listOfDescriptions.stream())
                 .toList();
 
@@ -63,8 +63,8 @@ public class TranslationServiceImp implements TranslationService {
 
         for (int i = 0; i < productsForTranslate.size(); i++) {
             int translateIndex = i * 2;
-            productsForTranslate.get(i).setProductName(translates.get(translateIndex));
-            productsForTranslate.get(i).setProductDescription(translates.get(translateIndex + 1));
+            productsForTranslate.get(i).setName(translates.get(translateIndex));
+            productsForTranslate.get(i).setDescription(translates.get(translateIndex + 1));
         }
         return productsForTranslate;
     }

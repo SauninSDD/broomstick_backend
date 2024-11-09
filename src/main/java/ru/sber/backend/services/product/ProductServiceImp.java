@@ -58,9 +58,15 @@ public class ProductServiceImp implements ProductService {
 
 
     @Override
-    public Page<ProductDTO> getProductsByName(int page, int size, String productName) {
-        Page<Product> productsByName = productRepository.findByProductName(productName, PageRequest.of(page, size));
-        return productsByName.map(getGetProductResponseFunction());
+    public Page<ProductDTO> getProductsByName(int page, int size, String productName, Long categoryId) {
+        boolean isExistCategory = productCategoryRepository.existsById(categoryId);
+        if (isExistCategory) {
+            Page<Product> productsByCategoryIdAndProductName = productRepository.findByCategoryIdAndProductName(categoryId, productName, PageRequest.of(page, size));
+            return productsByCategoryIdAndProductName.map(getGetProductResponseFunction());
+        } else {
+            Page<Product> productsByName = productRepository.findByProductName(productName, PageRequest.of(page, size));
+            return productsByName.map(getGetProductResponseFunction());
+        }
     }
 
     @Override

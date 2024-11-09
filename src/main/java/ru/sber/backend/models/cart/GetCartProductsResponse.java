@@ -17,11 +17,5 @@ public class GetCartProductsResponse {
 
     private int productValue;
 
-    private List<CartProductDTO> cartProductsList;
-
-    public GetCartProductsResponse(Cart cart, List<CartProductDTO> cartProductsList) {
-        this.totalPrice = cart.getClientCartTotalPrice();
-        this.productValue = cart.getClientCartProductValue();
-        this.cartProductsList = cartProductsList;
-    }
+    private List<CartProductDTOResponse> cartProductsList;
 }

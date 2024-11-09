@@ -7,7 +7,7 @@ import ru.sber.backend.models.product.ProductDTO;
 import java.math.BigDecimal;
 
 @Data
-public class CartProductDTO {
+public class CartProductDTOResponse {
     private Long id;
 
     private BigDecimal cartProductPrice;
@@ -16,7 +16,7 @@ public class CartProductDTO {
 
     private ProductDTO productDTO;
 
-    public CartProductDTO(CartProduct cartProduct) {
+    public CartProductDTOResponse(CartProduct cartProduct) {
         this.id = cartProduct.getId();
         this.cartProductPrice = cartProduct.getCartProductPrice();
         this.cartProductQuantity = cartProduct.getCartProductQuantity();

@@ -3,7 +3,7 @@ package ru.sber.backend.services.product;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.sber.backend.entities.product.ProductCategory;
-import ru.sber.backend.models.product.AddProductCategoryRequest;
+import ru.sber.backend.models.product.category.AddProductCategoryRequest;
 import ru.sber.backend.repositories.product.ProductCategoryRepository;
 
 import java.util.ArrayList;

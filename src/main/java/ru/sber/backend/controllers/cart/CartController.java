@@ -51,13 +51,13 @@ public class CartController {
     /**
      * Добавляет товар в корзину
      *
-     * @param productIdDTO id товара
+     * @param request id товара
      */
     @PreAuthorize("hasRole('client_user')")
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> addToCart(@RequestBody CartProductDTORequest productIdDTO) {
-        log.info("Добавление в корзину продукт с id: {}", productIdDTO);
-        boolean isAddedProduct = cartService.addToCart(productIdDTO.getProductId());
+    public ResponseEntity<ApiResponse<Void>> addToCart(@RequestBody CartProductDTORequest request) {
+        log.info("Добавление в корзину продукт с id: {}", request);
+        boolean isAddedProduct = cartService.addToCart(request.getProductId());
         if (isAddedProduct) {
             return ResponseEntity.ok(new ApiResponse<>(true));
         } else {
@@ -69,13 +69,13 @@ public class CartController {
 /**
      * Обновляет количество товара в корзине
      *
-     * @param productIdDTO Товар, у которого изменяется количество
+     * @param request Товар, у которого изменяется количество
      */
     @PreAuthorize("hasRole('client_user')")
     @PutMapping
-    public ResponseEntity<ApiResponse<Void>> updateCartProductQuantity(@RequestBody CartProductDTORequest productIdDTO) {
-        log.info("Изменяется количество товара на {} в корзине", productIdDTO.getQuantity());
-        boolean isUpdated = cartService.updateProductQuantity(productIdDTO.getProductId(), productIdDTO.getQuantity());
+    public ResponseEntity<ApiResponse<Void>> updateCartProductQuantity(@RequestBody CartProductDTORequest request) {
+        log.info("Изменяется количество товара на {} в корзине", request.getQuantity());
+        boolean isUpdated = cartService.updateProductQuantity(request.getProductId(), request.getQuantity());
 
         if (isUpdated) {
             return ResponseEntity.ok(new ApiResponse<>(true));
@@ -87,16 +87,15 @@ public class CartController {
     /**
      * Удаляет товар из корзины
      *
-     * @param productIdDTO DTO c id товара
+     * @param request DTO c id товара
      * @return корзина с внесенными изменениями
      */
-
     @PreAuthorize("hasRole('client_user')")
     @DeleteMapping("/deleteProduct")
-    public ResponseEntity<ApiResponse<Void>> deleteFromCart(@RequestBody CartProductDTORequest productIdDTO) {
-        log.info("Удаление из корзины товара с id: {}", productIdDTO.getProductId());
+    public ResponseEntity<ApiResponse<Void>> deleteFromCart(@RequestBody CartProductDTORequest request) {
+        log.info("Удаление из корзины товара с id: {}", request.getProductId());
 
-        boolean isDeleted = cartService.deleteFromCart(productIdDTO.getProductId());
+        boolean isDeleted = cartService.deleteFromCart(request.getProductId());
 
         if (isDeleted) {
             return ResponseEntity.ok(new ApiResponse<>(true));

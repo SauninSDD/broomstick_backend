@@ -14,9 +14,9 @@ public interface ProductService {
     ProductDTO getProductByArticle(int productArticle);
 
     //если не передана категория, то получает all продукты
-    Page<ProductDTO> getProductsByCategoryId(int page, int size, Long category);
+    Page<ProductDTO> getProductsByCategoryId(int page, int size, Long category);;
 
-    Page<ProductDTO> getProductsByName(int page, int size, String productName);
+    Page<ProductDTO> getProductsByName(int page, int size, String productName, Long categoryId);
 
     Page<ProductDTO> getProductsByPriceRangeAndCategory(int page, int size, BigDecimal minPrice, BigDecimal maxPrice, String category);
 

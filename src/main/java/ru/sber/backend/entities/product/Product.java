@@ -50,6 +50,9 @@ public class Product {
     @Column(nullable = false, unique = true)
     private int productArticle;
 
+    @Column
+    private String imageUrl;
+
     @ManyToOne
     @JoinColumn(name = "id_measure", nullable = false)
     @JsonIgnore

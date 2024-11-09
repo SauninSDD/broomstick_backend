@@ -5,12 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 import ru.sber.backend.entities.product.Product;
 
 import java.math.BigDecimal;
 
 @Entity
-@Embeddable
 @Table(name = "clients_carts_products")
 @Data
 @NoArgsConstructor
@@ -35,4 +35,15 @@ public class CartProduct { //некорректный какой-то вроде
 
     @Column
     private BigDecimal cartProductPrice;
+
+    @Override
+    public String toString() {
+        return "CartProduct{" +
+                "id=" + id +
+                ", cartId=" + cart.getId() +
+                ", productId=" + product.getId() +
+                ", cartProductQuantity=" + cartProductQuantity +
+                ", cartProductPrice=" + cartProductPrice +
+                '}';
+    }
 }

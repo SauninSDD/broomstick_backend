@@ -19,6 +19,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query("SELECT p FROM Product p WHERE LOWER(p.productName) LIKE LOWER(concat('%', :nameProduct, '%'))")
     Page<Product> findByProductName(String nameProduct, PageRequest of);
 
+    @Query("SELECT p FROM Product p WHERE p.category.id = :categoryId AND LOWER(p.productName) LIKE LOWER(concat('%', :nameProduct, '%'))")
+    Page<Product> findByCategoryIdAndProductName(Long categoryId, String nameProduct, PageRequest of);
+
     @Query("SELECT p FROM Product p WHERE p.productPrice BETWEEN :minPrice AND :maxPrice AND p.category.name = :category ")
     Page<Product> findByPriceRangeAndCategoryName(BigDecimal minPrice, BigDecimal maxPrice, String category, PageRequest of);
 
